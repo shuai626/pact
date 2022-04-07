@@ -21,6 +21,13 @@
          (error "parse definition error"))]
     [_ (error "Parse defn error" s)]))
 
+;; TODO: Finish implementation
+;; S-Expr -> Bool
+(define (parameter? s)
+  (match s
+    [(? symbol?) #t]
+    [_ #f]))
+
 ;; S-Expr -> Expr
 (define (parse-e s)
   (match s
@@ -29,7 +36,7 @@
     [(? char?)                     (Char s)]
     [(? string?)                   (Str s)]
     ['eof                          (Eof)]
-    [(? symbol?)                   (Var s)]
+    [(? parameter?)                   (Var s)]
     [(list 'quote (list))          (Empty)]
     [(list (? (op? op0) p0))       (Prim0 p0)]
     [(list (? (op? op1) p1) e)     (Prim1 p1 (parse-e e))]
@@ -40,13 +47,13 @@
      (Begin (parse-e e1) (parse-e e2))]
     [(list 'if e1 e2 e3)
      (If (parse-e e1) (parse-e e2) (parse-e e3))]
-    [(list 'let (list (list (? symbol? x) e1)) e2)
+    [(list 'let (list (list (? parameter? x) e1)) e2)
      (Let x (parse-e e1) (parse-e e2))]
     [(cons 'match (cons e ms))
      (parse-match (parse-e e) ms)]
     [(list (or 'lambda 'λ) xs e)
      (if (and (list? xs)
-              (andmap symbol? xs))
+              (andmap parameter? xs))
          (Lam (gensym 'lambda) xs (parse-e e))
          (error "parse lambda error"))]
     [(cons e es)
@@ -69,7 +76,7 @@
     [(? integer?) (PLit p)]
     [(? char?)    (PLit p)]
     ['_           (PWild)]
-    [(? symbol?)  (PVar p)]
+    [(? parameter?)  (PVar p)]
     [(list 'quote (list))
      (PLit '())]
     [(list 'box p)
@@ -96,3 +103,13 @@
   (λ (x)
     (and (symbol? x)
          (memq x ops))))
+
+;; Prim -> Type
+(define (prim-to-type prim)
+  (match prim
+    [(? boolean?) (BoolType)]
+    [(? integer?) (IntType)]
+    [(? char?)    (CharType)]
+    [(? string?)  (StrType)]
+    ['()          (UnitType)]))
+
