@@ -21,11 +21,65 @@
          (error "parse definition error"))]
     [_ (error "Parse defn error" s)]))
 
-;; TODO: Finish implementation
+;; S-Expr -> Bool
+(define (type? s)
+  (match s
+    ['UnitType                                #t]
+    ['IntType                                 #t]
+    ['BoolType                                #t]
+    ['CharType                                #t]
+    ['StrType                                 #t]
+    [(list 'TupleType (? type-list?))         #t]
+    [(list 'VecType (? type?))                #t]
+    [(list 'FunType (? type-list?) (? type?)) #t]
+    [(list 'RefType (? type?))                #t]
+    [(list 'RecType (? symbol?) (? type?))    #t]))
+
+;; S-Expr -> Bool
+(define (type-list? s)
+  (error "not implemented"))
+
+;; Prim -> Type
+(define (prim-to-type prim)
+  (match prim
+    [(? boolean?) (BoolType)]
+    [(? integer?) (IntType)]
+    [(? char?)    (CharType)]
+    [(? string?)  (StrType)]
+    ['()          (UnitType)]))
+
+;; S-Expr -> Type
+(define (parse-type s)
+  (match s
+    ['UnitType                                      (UnitType)]
+    ['IntType                                       (IntType)]
+    ['BoolType                                      (BoolType)]
+    ['CharType                                      (CharType)]
+    ['StrType                                       (StrType)]
+    [(list 'TupleType (? type-list? ts))            (TupleType (parse-type-list ts))]
+    [(list 'VecType (? type? t))                    (VecType (parse-type t))]
+    [(list 'FunType (? type-list? ts) (? type? rt)) (FunType (parse-type-list ts) (parse-type rt))]
+    [(list 'RefType (? type? t))                    (RefType (parse-type t))]
+    [(list 'RecType (? symbol? n) (? type? t))      (RecType n (parse-type t))]
+    [_  (error "program parse error for type")]))
+
+;; TODO: Implement.
+;; S-Expr -> [Listof Type]
+(define (parse-type-list s)
+  (error "not implemented"))
+    
+;; S-Expr -> Parameter
+(define (parse-parameter s)
+  (match s
+    [(? symbol?)                      (Parameter s DynType)]
+    [(list (? symbol? x) (? type? t)) (Parameter x t)]
+    [_                                (error "program parse error for parameter")]))
+
 ;; S-Expr -> Bool
 (define (parameter? s)
   (match s
     [(? symbol?) #t]
+    [(list (? symbol?) ': t) #t] 
     [_ #f]))
 
 ;; S-Expr -> Expr
@@ -36,7 +90,7 @@
     [(? char?)                     (Char s)]
     [(? string?)                   (Str s)]
     ['eof                          (Eof)]
-    [(? parameter?)                   (Var s)]
+    [(? parameter?)                (Var s)]
     [(list 'quote (list))          (Empty)]
     [(list (? (op? op0) p0))       (Prim0 p0)]
     [(list (? (op? op1) p1) e)     (Prim1 p1 (parse-e e))]
@@ -103,13 +157,3 @@
   (λ (x)
     (and (symbol? x)
          (memq x ops))))
-
-;; Prim -> Type
-(define (prim-to-type prim)
-  (match prim
-    [(? boolean?) (BoolType)]
-    [(? integer?) (IntType)]
-    [(? char?)    (CharType)]
-    [(? string?)  (StrType)]
-    ['()          (UnitType)]))
-

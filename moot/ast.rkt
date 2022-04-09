@@ -97,3 +97,5 @@
 (struct RefType (t)     #:prefab)
 (struct RecType (n t)   #:prefab)
 
+;; type Parameter = (Parameter Id Type)
+(struct Parameter (x t))
