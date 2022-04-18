@@ -7,6 +7,11 @@
 ;; type Defn = (Defn Id (Listof Id) Expr)
 (struct Defn (f xs e) #:prefab)
 
+;; type DefnContract = (DefnContract Defn (Listof Id) Id)
+
+;; contract-expr is a list of variables pointing to functions. These functions must be 1-ary and return Bool
+(struct DefnContract (defn contract-list ret-contract) #:prefab)
+
 ;; type Expr = (Eof)
 ;;           | (Empty)
 ;;           | (Int Integer)
