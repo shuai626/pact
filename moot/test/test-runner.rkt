@@ -286,7 +286,13 @@
                      '(tri 36))
                 666)
   (check-equal? (run '((match 8 [8 (lambda (x) x)]) 12))
-                12))
+                12)
+                
+   ;; Moot examples
+   (check-equal? (run '(define/contract (furlongs->feet fr) (-> integer? integer?) (* 660 fr)) '(furlongs->feet "not a furlong")) 'err)
+)
+
+
 
 (define (test-runner-io run)
   ;; Evildoer examples

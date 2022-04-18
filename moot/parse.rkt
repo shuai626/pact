@@ -9,8 +9,12 @@
      (match (parse s)
        [(Prog ds e)
         (Prog (cons (parse-define d) ds) e)])]
+    [(cons (and (cons 'define/contract _) d) s)
+     (match (parse s)
+       [(Prog ds e)
+        (Prog (cons (parse-define-contract d) ds) e)])]
     [(cons e '()) (Prog '() (parse-e e))]
-    [_ (error "program parse error")]))
+    [_ (error "program parse error 1")]))
 
 ;; S-Expr -> Defn
 (define (parse-define s)
@@ -19,6 +23,24 @@
      (if (andmap symbol? xs)
          (Defn f xs (parse-e e))
          (error "parse definition error"))]
+    [_ (error "Parse defn error" s)]))
+
+;; S-Expr -> DefnContract
+
+;; Converts define/contract string into DefnContract AST node.
+;; DefnContract stores a Defn struct and a list of Ids. Ids will be used to look-up
+;; Function definitions at compile-time.
+
+;; Checks that the number of predicates equates the number of parameters + 1 (for the return type). 
+;; TODO: Add support for multiple predicates per parameter / return type
+
+(define (parse-define-contract s)
+  (match s
+    [(list 'define/contract (list-rest (? symbol? f) xs) (cons '-> vs) e)
+     (match (extract-last vs)
+      [(cons a b)   (if (and (andmap symbol? xs) (andmap symbol? vs) (= (length a) (length xs))) 
+                      (DefnContract (Defn f xs (parse-e e)) a (car b))
+                      (error "parse definition error"))])]
     [_ (error "Parse defn error" s)]))
 
 ;; S-Expr -> Expr
@@ -96,3 +118,13 @@
   (λ (x)
     (and (symbol? x)
          (memq x ops))))
+
+(define (extract-last xs)
+  (match xs
+    ['() (raise "no last element")]
+    [(cons x xs) #:when (empty? xs)
+                 (list '() x)]
+    [(cons x xs)
+     (let ([ys (extract-last xs)])
+       (list (cons x (car ys)) (car (cdr ys)))
+    )]))
