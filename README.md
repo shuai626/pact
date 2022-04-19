@@ -14,7 +14,7 @@ racket
 ```
 
 ### Parsing:
-To test parsing, first modify `example.rkt` with desired code. Then, inside the racket IDE:
+To test parsing, do the following inside the racket IDE:
 
 ```
 (require "parse.rkt")
@@ -23,7 +23,7 @@ To test parsing, first modify `example.rkt` with desired code. Then, inside the 
 ```
 
 ### Compiling:
-To test compilation, first modify `example.rkt` with desired code. Then, inside the racket IDE, run the following:
+To test compilation,do the following inside the racket IDE, run the following:
 
 ```
 (require "compile.rkt")
