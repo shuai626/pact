@@ -17,18 +17,19 @@ racket
 To test parsing, first modify `example.rkt` with desired code. Then, inside the racket IDE:
 
 ```
-(require "parse-file.rkt")
+(require "parse.rkt")
 
-(main "example.rkt")
+(parse '(<insert_program_here>))
 ```
 
 ### Compiling:
 To test compilation, first modify `example.rkt` with desired code. Then, inside the racket IDE, run the following:
 
 ```
-(require "compile-file.rkt")
+(require "compile.rkt")
+(require "parse.rkt")
 
-(main "example.rkt")
+(compile (parse '(<insert_program_here>)))
 ```
 
 ### Testing:

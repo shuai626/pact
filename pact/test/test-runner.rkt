@@ -682,7 +682,8 @@
                         (match 0
                           [(and (? pred) _) #t]
                           [_ #f])))
-                #t))
+                #t)
+)
 
 
 (define (test-runner-io run)

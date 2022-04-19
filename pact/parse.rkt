@@ -33,7 +33,8 @@
 
 (define (def-keyword? x)
   (or (eq? x 'define)
-      (eq? x 'struct)))
+      (eq? x 'struct)
+      (eq? x 'define/contract)))
 
 ;; [Listof S-Expr] -> Lib
 (define (parse-library s)
@@ -67,6 +68,16 @@
     [(list 'define (? symbol? x) e)
      (match (parse-e e)
        [e (list (Defn x e))])]
+    [(list 'define/contract (cons f xs) (cons '-> vs) e)
+     (match (parse-param-list xs e)
+        [(Lam l xs e)
+          (match (extract-last vs)
+            [(cons a b)   
+             (if (and (andmap symbol? xs) (andmap symbol? vs) (= (length a) (length xs)))
+                 (list (DefnContract (Defn f (Lam l xs e)) a (car b))) 
+                 (error "parse definition error"))])]
+        [(LamRest l xs x e)
+           (error "parse definition error")])] ; Contracts currently do not support rest-arguements
     [(cons 'struct _)
      (parse-struct s)]
     [_ (error "Parse defn error" s)]))
@@ -362,3 +373,13 @@
 
 (define (drop-% x)
   (string->symbol  (substring (symbol->string x) 1)))
+
+(define (extract-last xs)
+  (match xs
+    ['() (raise "no last element")]
+    [(cons x xs) #:when (empty? xs)
+                 (list '() x)]
+    [(cons x xs)
+     (let ([ys (extract-last xs)])
+       (list (cons x (car ys)) (car (cdr ys)))
+    )]))
