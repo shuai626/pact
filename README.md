@@ -1,15 +1,15 @@
-# loot/
+# outlaw/
 
-Hosts files for the original 430 Loot compiler
+Hosts files for the original 430 Outlaw compiler
 
-# moot/
+# pact/
 
 Hosts files for compiler with function contracts
 
 ## Instructions:
 To open the Racket IDE:
 ```
-cd moot
+cd pact
 racket
 ```
 
@@ -34,6 +34,6 @@ To test compilation, first modify `example.rkt` with desired code. Then, inside 
 ### Testing:
 To run the test suite:
 ```
-cd moot/test
+cd pact/test
 racket compile.rkt
 ```
