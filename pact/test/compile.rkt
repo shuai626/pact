@@ -3,6 +3,7 @@
          "../parse.rkt"
          "../compile.rkt"
          "../unload-bits-asm.rkt"
+         "../remove-contracts.rkt"
          "../a86/interp.rkt")
 
 ;; link with runtime for IO operations
@@ -11,7 +12,7 @@
 (current-objs
  (list (path->string (normalize-path "../runtime.o"))))
 
-(test-runner    (λ p (unload/free (asm-interp (compile (parse p))))))
+(test-runner    (λ p (unload/free (asm-interp (compile (remove-contracts (parse p)))))))
 (test-runner-io (λ (s . p)
                   (match (asm-interp/io (compile (parse p)) s)
                     ['err 'err]

@@ -683,6 +683,18 @@
                           [(and (? pred) _) #t]
                           [_ #f])))
                 #t)
+
+   ;; Pact examples
+
+  (check-equal? (run '(define/contract (bake flavor) (-> string? string?)
+  (string-append flavor " pie"))'(bake "apple")) "apple pie")
+
+  (check-equal? (run '(define/contract (bake flavor) (-> string? string?)
+  (string-append flavor " pie"))'(bake #t)) 'err)
+
+  (check-equal? (run '(define/contract (bake flavor) (-> string? string?)
+  #t)'(bake "apple")) 'err)
+  
 )
 
 
@@ -774,4 +786,5 @@
                 (cons 11 "hello world"))
   (check-equal? (run "" '(displayln "hello world"))
                 (cons (void) "hello world\n"))
-  )
+
+ )
