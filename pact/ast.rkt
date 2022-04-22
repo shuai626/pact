@@ -10,10 +10,13 @@
 ;; type Defn = (Defn Id Lambda)
 (struct Defn (f l) #:prefab)
 
-;; type DefnContract = (DefnContract Defn (Listof Id) Id)
+;; type DefnContract = (DefnContract Defn (Listof Predicate) Predicate)
 
 ;; contract-expr is a list of variables pointing to functions. These functions must be 1-ary and return Bool
 (struct DefnContract (defn contract-list ret-contract) #:prefab)
+
+;; type Predicate = (Id)
+;;                | (Listof Predicate)
 
 ;; type Expr   = (Eof)
 ;;             | (Quote Datum)

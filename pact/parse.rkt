@@ -69,18 +69,26 @@
      (match (parse-e e)
        [e (list (Defn x e))])]
     [(list 'define/contract (cons f xs) (cons '-> vs) e)
-     (match (parse-param-list xs e)
+    (let ((ps (map parse-predicate vs)))
+      (match (parse-param-list xs e)
         [(Lam l xs e)
-          (match (extract-last vs)
+          (match (extract-last ps)
             [(cons a b)   
-             (if (and (andmap symbol? xs) (andmap symbol? vs) (= (length a) (length xs)))
+             (if (and (andmap symbol? xs) (= (length a) (length xs)))
                  (list (DefnContract (Defn f (Lam l xs e)) a (car b))) 
-                 (error "parse definition error"))])]
+                 (error "parse define/contract error"))])]
         [(LamRest l xs x e)
-           (error "parse definition error")])] ; Contracts currently do not support rest-arguements
+           (error "parse definition error")]))] ; Contracts currently do not support rest-arguements
     [(cons 'struct _)
      (parse-struct s)]
     [_ (error "Parse defn error" s)]))
+
+  ;; S-Expr -> Predicate
+(define (parse-predicate v)
+  (match v
+    [(cons '-> p)
+      (map parse-predicate p)]
+    [x (if (symbol? x) x (error "parse predicate error"))]))
 
   ;; S-Expr -> [Listof Defn]
 (define (parse-struct s)
