@@ -41,14 +41,14 @@
     (Let (list label) (list expr) (expand-contract label out expr))))
 
 ; id Predicate expr
-(define (expand-contract x contract expr)
-  (match contract
-    [(list _ ...) (expand-higher-contract x contract expr)]
+(define (expand-contract x c expr)
+  (match c
+    [(list _ ...) (expand-higher-contract x c expr)]
     [pred (If (App (Var pred) (list (Var x))) expr (errorast "you"))]))
 
 ; id (Listof Predicate) expr -> expr
-(define (expand-higher-contract x contracts expr)
-  (match (extract-last contracts)
+(define (expand-higher-contract x cs expr)
+  (match (extract-last cs)
     [(cons ins out)
      ; Get variables for the lambda
      (let ([syms (n-syms (length ins) "hcon")])
