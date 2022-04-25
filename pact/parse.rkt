@@ -1,6 +1,6 @@
 #lang racket
 (provide parse parse-define parse-e parse-library)
-(require "stdlib.rkt" "ast.rkt")
+(require "stdlib.rkt" "ast.rkt" "utils.rkt" "parse-utils.rkt")
 
 ;; [Listof S-Expr] -> Prog
 (define (parse s)
@@ -381,13 +381,3 @@
 
 (define (drop-% x)
   (string->symbol  (substring (symbol->string x) 1)))
-
-(define (extract-last xs)
-  (match xs
-    ['() (raise "no last element")]
-    [(cons x xs) #:when (empty? xs)
-                 (list '() x)]
-    [(cons x xs)
-     (let ([ys (extract-last xs)])
-       (list (cons x (car ys)) (car (cdr ys)))
-    )]))

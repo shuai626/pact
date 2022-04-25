@@ -1,7 +1,8 @@
 #lang racket
 (provide remove-contracts)
 (require "ast.rkt"
-         "env.rkt")
+         "env.rkt"
+         "parse-utils.rkt")
 
 ; Prog -> Prog
 (define (remove-contracts p)
@@ -22,7 +23,7 @@
     ; identity otherwise
     [x x]))
 
-; id [Listof id] expr id id -> Defn
+; id id [Listof id] expr [Listof Predicate] Predicate -> Defn
 (define (expand-defcontract f g xs expr ins out)
   ; apply in contracts to all inputs
   (let* ([in-expr (foldl expand-incontract expr xs ins)]
@@ -30,19 +31,38 @@
         [out-expr (expand-outcontract in-expr out)])
     (Defn f (Lam g xs out-expr))))
 
-; id expr id -> expr
-(define (expand-incontract x in expr)
-  (If (App (Var in) (list (Var x))) expr (errorast "you")))
+;  id Predicate expr -> expr
+(define (expand-incontract x in expr) (expand-contract x in expr))
 
-; id expr id -> expr
+; expr Predicate -> expr
 (define (expand-outcontract expr out)
   (let ([label (gensym "out")])
-    ; Execute expression
-    (Let (list label) (list expr)
-         ; return label if App otherwise throw
-         (If (App (Var out) (list (Var label))) (Var label)
-             (errorast "me")))))
+    ; Assign new variable to expression output and expand the out contract
+    (Let (list label) (list expr) (expand-contract label out expr))))
 
+; id Predicate expr
+(define (expand-contract x contract expr)
+  (match contract
+    [(list _ ...) (expand-higher-contract x contract expr)]
+    [pred (If (App (Var pred) (list (Var x))) expr (errorast "you"))]))
+
+; id (Listof Predicate) expr -> expr
+(define (expand-higher-contract x contracts expr)
+  (match (extract-last contracts)
+    [(cons ins out)
+     ; Get variables for the lambda
+     (let ([syms (n-syms (length ins) "hcon")])
+       ; Reassign higher order contract variable to a lambda expression
+       (Let (list x)
+            (list (Lam (gensym "lam")
+                       symbols
+                       ; Lambda expression calls original input var (presumably a function)
+                       ; with the generated variables. Then the in and out contracts are
+                       ; expanded "around" the call.
+                       (expand-outcontract
+                        (foldl expand-incontract (App (Var x) (map Var syms)) syms ins)
+                        out)))
+            expr))]))
 
 ; Helper for generating error messages
 (define (errorast str)
@@ -55,3 +75,10 @@
     [((cons x xs) (cons y ys))
      (cons (list x y)
            (zip xs ys))]))
+
+; Produce N gensym symbols as Vars
+; int [Optional str] -> [Listof Var]
+(define (n-syms n [label ""])
+  (match n
+    [0 '()]
+    [n (cons (Var (gensym label)) (n-syms (sub1 n) label))]))
