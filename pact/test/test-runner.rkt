@@ -694,6 +694,9 @@
 
   (check-equal? (run '(define/contract (bake flavor) (-> string? string?)
   #t)'(bake "apple")) 'err)
+
+  (check-equal? (run '(define/contract (bake flavor) (-> (-> string? int?) string?)
+                     (* 2 (flavor "hello world")))'(bake string-length)) 22) 
   
 )
 

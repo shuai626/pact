@@ -32,10 +32,10 @@
     (Defn f (Lam g xs out-expr))))
 
 ; expr Predicate -> expr
-(define (expand-outcontract expr out) (begin (print out)
+(define (expand-outcontract expr out)
   (let ([label (gensym "out")])
     ; Assign new variable to expression output and expand the out contract
-    (Let (list label) (list expr) (expand-contract label out expr)))))
+    (Let (list label) (list expr) (expand-contract label out expr))))
 
 ; id Predicate expr
 (define (expand-contract x c expr)
@@ -79,4 +79,4 @@
 (define (n-syms n [label ""])
   (match n
     [0 '()]
-    [n (cons (Var (gensym label)) (n-syms (sub1 n) label))]))
+    [n (cons (gensym label) (n-syms (sub1 n) label))]))
