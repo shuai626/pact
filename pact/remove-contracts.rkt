@@ -35,7 +35,7 @@
 (define (expand-outcontract expr out)
   (let ([label (gensym "out")])
     ; Assign new variable to expression output and expand the out contract
-    (Let (list label) (list expr) (expand-contract label out expr))))
+    (Let (list label) (list expr) (expand-contract label out (Var label)))))
 
 ; id Predicate expr
 (define (expand-contract x c expr)
