@@ -2,5 +2,6 @@
 *.s
 *.S
 *~
+*.bak
 **/compiled
 pact/compiled
