@@ -695,14 +695,33 @@
   (check-equal? (run '(define/contract (bake flavor) (-> string? string?)
   #t)'(bake "apple")) 'err)
 
+  ; Good 1 level high order contract
   (check-equal? (run '(define/contract (bake flavor) (-> (-> string? integer?) integer?)
                      (* 2 (flavor "hello world")))'(bake string-length)) 22) 
 
+  ; Bad function output on high order contract
   (check-equal? (run '(define/contract (bake flavor) (-> (-> string? integer?) integer?)
                      (* 2 (flavor "hello world")))'(bake string->list)) 'err) 
   
+  ; Bad function input on high order contract
   (check-equal? (run '(define/contract (bake flavor) (-> (-> string? integer?) integer?)
                      (* 2 (flavor "hello world")))'(bake integer->char)) 'err) 
+  
+  ; Good 2 level high order contract
+  (check-equal? (run '(define (foo x y) (+ x (y "hello world")))'(define/contract (bake flavor) (-> (-> integer? (-> string? integer?) integer?) integer?)
+                     (flavor 10 string-length))'(bake foo)) 21) 
+
+  ; Bad function for high order contract
+  (check-equal? (run '(define/contract (bake flavor) (-> (-> integer? (-> string? integer?) integer?) integer?)
+                     (flavor 10 string-length))'(bake string-length)) 'err) 
+
+  ; Bad input to first high order contract 
+  (check-equal? (run '(define (foo x y) (+ x (y "hello world")))'(define/contract (bake flavor) (-> (-> integer? (-> string? integer?) integer?) integer?)
+                     (flavor "apple" string-length))'(bake foo)) 'err) 
+
+  ; Bad input to second high order contract
+  (check-equal? (run '(define (foo x y) (+ x (y 1)))'(define/contract (bake flavor) (-> (-> integer? (-> string? integer?) integer?) integer?)
+                     (flavor 10 string-length))'(bake foo)) 'err) 
 )
 
 
