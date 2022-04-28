@@ -1,5 +1,5 @@
 #lang racket
-(provide remove-contracts expand-defcontract)
+(provide remove-contracts)
 (require "ast.rkt"
          "env.rkt"
          "parse-utils.rkt")
