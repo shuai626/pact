@@ -1,4 +1,5 @@
 #lang racket
 (define/contract (bake flavor) (-> string? string?)
-  (string-append flavor " pie"))
+  (string-append flavor))
+
 (bake "apple")
