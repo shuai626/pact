@@ -23,13 +23,19 @@ To test parsing, do the following inside the racket IDE:
 ```
 
 ### Compiling:
-To test compilation,do the following inside the racket IDE, run the following:
+To test compilation, do the following inside the racket IDE, run the following:
 
 ```
 (require "compile.rkt")
 (require "parse.rkt")
 
 (compile (parse '(<insert_program_here>)))
+```
+
+OR if you have a racket program (i.e.  `programs` directory), call the following:
+```
+make <program_name>.run
+./<program_name>.run
 ```
 
 ### Testing:
