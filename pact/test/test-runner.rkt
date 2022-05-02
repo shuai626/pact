@@ -685,7 +685,6 @@
                 #t)
 
    ;; Pact examples
-
   (check-equal? (run '(define/contract (bake flavor) (-> string? string?)
   (string-append flavor " pie"))'(bake "apple")) "apple pie")
 
@@ -722,6 +721,30 @@
   ; Bad input to second high order contract
   (check-equal? (run '(define (foo x y) (+ x (y 1)))'(define/contract (bake flavor) (-> (-> integer? (-> string? integer?) integer?) integer?)
                      (flavor 10 string-length))'(bake foo)) 'err) 
+
+  ; Good input for recursive contract
+  (check-equal? (run '(define/contract (sum n) (-> integer? integer?) (if (= n 0) 0 (+ n (sum (- n 1)))))'(sum 4)) 10)
+
+  ; Bad input for recursive contract
+  (check-equal? (run '(define/contract (sum n) (-> integer? integer?) (if (= n 0) 0 (+ n (sum (- n 1)))))'(sum "hi")) 'err) 
+
+  ; Bad function for recursive contract
+  (check-equal? (run '(define/contract (sum n) (-> integer? integer?) (if (= n 0) "0" (+ n (sum (- n 1)))))'(sum 4)) 'err) 
+
+  ; Good input for recursive higher order contract
+  (check-equal? (run '(define (sum n) (if (= n 0) 0 (+ n (sum (- n 1)))))'(define/contract (outersum f n) (-> (-> integer? integer?) integer? integer?) (if (= n 0) 0 (+ (f n) (outersum f (- n 1)))))'(outersum sum 5)) 35)
+
+  ; Bad input for recursive higher order contract
+  (check-equal? (run '(define (sum n) (if (= n 0) 0 (+ n (sum (- n 1)))))'(define/contract (outersum f n) (-> (-> integer? integer?) integer? integer?) (if (= n 0) 0 (+ (f n) (outersum f (- n 1)))))'(outersum string? 5)) 'err)
+
+  ; Bad input for recursive contract
+  (check-equal? (run '(define (sum n) (if (= n 0) "0" (+ n (sum (- n 1)))))'(define/contract (outersum f n) (-> (-> integer? integer?) integer? integer?) (if (= n 0) 0 (+ (f n) (outersum f (- n 1)))))'(outersum sum 5)) 'err)
+
+  ; Bad function for recursive contract
+  (check-equal? (run '(define (sum n) (if (= n 0) 0 (+ n (sum (- n 1)))))'(define/contract (outersum f n) (-> (-> integer? integer?) integer? integer?) (if (= n 0) 0 (+ (f n) (outersum string? (- n 1)))))'(outersum sum 5)) 'err)
+
+  ; Bad function for recursive contract
+  (check-equal? (run '(define (sum n) (if (= n 0) 0 (+ n (sum (- n 1)))))'(define/contract (outersum f n) (-> (-> integer? integer?) integer? integer?) (if (= n 0) "0" (+ (f n) (outersum f (- n 1)))))'(outersum sum 5)) 'err)
 )
 
 
