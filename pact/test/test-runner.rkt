@@ -745,7 +745,56 @@
 
   ; Bad function for recursive contract
   (check-equal? (run '(define (sum n) (if (= n 0) 0 (+ n (sum (- n 1)))))'(define/contract (outersum f n) (-> (-> integer? integer?) integer? integer?) (if (= n 0) "0" (+ (f n) (outersum f (- n 1)))))'(outersum sum 5)) 'err)
-)
+
+  ;;  (string -> string) (string -> string) -> string blames
+  ; working
+  (check-equal? (run '(define (prep x) (string-append "cut " x)) '(define (mix y) (string-append "mixed " y))
+                     '(define/contract (prepare f g veggie) (-> (-> string? string?) (-> string? string?) string? string?)
+                        (string-append (f veggie) (g veggie))) '(prepare prep mix "fruit")) "cut fruitmixed fruit")
+
+  ; now my error (return type)
+  (check-equal? (run '(define (prep x) (string-append "cut " x)) '(define (mix y) (string-append "mixed " y))
+                     '(define/contract (prepare f g veggie) (-> (-> string? string?) (-> string? string?) string? string?)
+                        (string-length (f veggie))) '(prepare prep mix "fruit")) 'err)
+
+  ; your error
+  (check-equal? (run '(define (prep x) (string-length x)) '(define (mix y) (string-append "mixed " y))
+                     '(define/contract (prepare f g veggie) (-> (-> string? string?) (-> string? string?) string? string?)
+                        (string-append (f veggie) (g veggie))) '(prepare prep mix "fruit")) 'err)
+
+  ; my error (usage of functions)
+  (check-equal? (run '(define (prep x) (string-append "cut " x)) '(define (mix y) (string-append "mixed " y))
+                     '(define/contract (prepare f g veggie) (-> (-> string? string?) (-> string? string?) string? string?)
+                        (string-append (f 1) (g 2))) '(prepare prep mix "fruit")) 'err)
+
+
+
+  ;; ((string-> string) -> string) -> string blames
+  (check-equal? (run '(define (prep x) (string-append "cut " x)) '(define (mix-bananas y) (string-append "mixed " (y "bananas")))
+                     '(define/contract (prepare prepfun fruit) (-> (-> (-> string? string?) string?)  string? string?)
+                        (string-append (prepfun prep) " " fruit )) '(prepare mix-bananas "strawberries")) "mixed cut bananas strawberries")
+  ; now check return (me)
+  (check-equal? (run '(define (prep x) (string-append "cut " x)) '(define (mix-bananas y) (string-append "mixed " (y "bananas")))
+                     '(define/contract (prepare prepfun fruit) (-> (-> (-> string? string?) string?)  string? string?)
+                        (string-length (prepfun prep))) '(prepare mix-bananas "strawberries")) 'err)
+
+  ; check your return on mix-bananas (you)
+  (check-equal? (run '(define (prep x) (string-append "cut " x)) '(define (mix-bananas y) (string-length (y "bananas")))
+                     '(define/contract (prepare prepfun fruit) (-> (-> (-> string? string?) string?)  string? string?)
+                        (string-append (prepfun prep) " " fruit )) '(prepare mix-bananas "strawberries")) 'err)
+
+  ; check my return on prep (me)
+  (check-equal? (run '(define (prep x) (string-length x)) '(define (mix-bananas y) (string-append "mixed " (y "bananas")))
+                     '(define/contract (prepare prepfun fruit) (-> (-> (-> string? string?) string?)  string? string?)
+                        (string-append (prepfun prep) " " fruit )) '(prepare mix-bananas "strawberries")) 'err)
+
+  ; check your usage of prep (you)
+  (check-equal? (run '(define (prep x) (string-append "cut " x)) '(define (mix-bananas y) (string-append "mixed " (y 1)))
+                     '(define/contract (prepare prepfun fruit) (-> (-> (-> string? string?) string?)  string? string?)
+                        (string-append (prepfun prep) " " fruit )) '(prepare mix-bananas "strawberries")) 'err)
+
+
+  )
 
 
 (define (test-runner-io run)
