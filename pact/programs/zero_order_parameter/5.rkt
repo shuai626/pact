@@ -1,3 +1,3 @@
 #lang racket
-(define/contract (bake flavor x y z) (-> string? integer? integer? integer? string?)
+(define/contract (bake flavor x y z a) (-> string? integer? integer? integer? integer? string?)
   (string-append flavor))
