@@ -1,6 +1,9 @@
 # Modify remove-contracts.rkt Line 22 to return Defn or expand contract
-PROGRAM_DIR=programs
+PROGRAM_DIR=programs/return_value
 TRIALS=30
+
+# Select between "s" or "run"
+FILE_TYPE=s
 
 files=($( ls $PROGRAM_DIR/*.rkt ))
 
@@ -12,7 +15,7 @@ rm
 for file in "${files[@]}"
 do
   cleaned_file_path="${file%.rkt}"
-  executable=${cleaned_file_path}.run
+  executable=${cleaned_file_path}.${FILE_TYPE}
   cleaned_file="${cleaned_file_path#${PROGRAM_DIR}/}"
 
   echo "Profiling compile time for" $cleaned_file_path
